@@ -251,6 +251,86 @@ Example :
 ```
 
 ## ./enter_doze_mode.sh
+This script put the device is DOZE MODE.
+
+
+Example : 
+```sh
+./enter_doze_mode.sh
+./enter_doze_mode.sh -p com.android.vending
+./enter_doze_mode.sh -s emulator-5556
+./enter_doze_mode.sh -s emulator-5556 -p com.android.vending
+```
+
+## ./extract_apk.sh
+This script allow to extract an APK from a non-root device.
+
+
+Example : 
+```sh
+./extract_apk.sh
+./extract_apk.sh -3
+./extract_apk.sh -a
+./extract_apk.sh -3 -a
+```
+
+## ./generate_md_doc.sh
+This script generate the documentation for the scripts based on script comments.
+It's better than maintaining the documentation by hand, isn't it ?
+
+
+Example : 
+```sh
+./generate_md_doc.sh
+```
+
+## ./grant_all_permissions.sh
+This script grant all permission for a package.
+
+
+Example : 
+```sh
+./grant_all_permissions.sh -p com.android.vending
+./grant_all_permissions.sh -s emulator-5556 -p com.android.vending
+```
+
+## ./install_all_apk.sh
+This script install all APK in a folder. Use install_apk.sh script.
+
+Example : 
+```sh
+./install_all_apk.sh -f /c/apk/
+./install_all_apk.sh -s emulator-5556 -f /c/apk/
+```
+
+## ./install_apk.sh
+This script install an application on a device using serial AND file name.
+Force install in case of:
+- Application already installed.
+- Downgrade.
+- Signature error.
+- Test application.
+If first attempt of install fail, then uninstall the application, and try to install again.
+
+
+Example : 
+```sh
+./install_apk.sh -a /c/apk/Application.apk
+./install_apk.sh -s emulator-5556 -a /c/apk/Application.apk
+```
+
+## ./jacoco_extract_code_coverage.sh
+This script allow generating JACOCO report (the Jacoco Broadcast receiver MUST have been integrated in the application).
+
+
+Example : 
+```sh
+./jacoco_extract_code_coverage.sh -p com.android.vending
+./jacoco_extract_code_coverage.sh -p com.android.vending -f temp_report.ec
+./jacoco_extract_code_coverage.sh -p com.android.vending -f temp_report.ec -d campaign1
+```
+
+## ./keystore_password.sh
 This script contain an example to update the password of the keystore and the KeyAlias.
 
 
@@ -260,4 +340,56 @@ Example :
 ```
 
 ## ./lockito.sh
+This script launch lockito simulation.
+
+
+Example : 
+```sh
+./lockito.sh
+./lockito.sh -s emulator-5556
+./lockito.sh -s emulator-5556 -l 3
+```
+
+## ./reset_appium.sh
+This script remove the appium applications.
+
+
+Example : 
+```sh
+./reset_appium.sh
+./reset_appium.sh -s emulator-5556
+```
+
+## ./reset_test.sh
+This script reset the application turn off the Bluetooth and turn off the GPS.
+
+
+Example : 
+```sh
+./reset_test.sh
+./reset_test.sh -s emulator-5556
+./reset_test.sh -s emulator-5556 -l 3
+```
+
+## ./start_app.sh
+This script start an application. If the Activity is not filled, then discover by itself.
+
+
+Example : 
+```sh
+./start_app.sh -p fr.dvilleneuve.lockito
+./start_app.sh -s emulator-5556 -p fr.dvilleneuve.lockito
+./start_app.sh -p fr.dvilleneuve.lockito -a .ui.SplashscreenActivity
+./start_app.sh -s emulator-5556 -p fr.dvilleneuve.lockito -a .ui.SplashscreenActivity
+```
+
+## ./take_screenshot.sh
+This script add or remove the application to the battery optimization list.
+
+
+Example : 
+```sh
+./take_screenshots.sh -f filename
+./take_screenshots.sh -s emulator-5556 -f filename
+```
 
