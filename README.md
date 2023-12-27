@@ -1,102 +1,263 @@
-<a name="readme-top"></a>
+# Bash scripts
+This folder contain scripts to ease life while developing on Android.
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![GNU GPLv3 License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-	
-<br />
-<div align="center">
+## ./_config_apps.sh
+This script set the list of the applications that must be used by other scrips (clear_data_app.sh, ...).
 
-  <h3 align="center">AndroidBashScripts</h3>
+## ./_config_signatures.sh
+This script define the expected signature of the applications
+- signatureListArray : the signatures.
+- certificateHashArray : the certificates hashes.
+- signatureAPKNameExceptionArray : the list of the APKs that the signature must be ignored.
 
-  <p align="center">
-    Collection of bash scripts for Android usage.
-	<br />
-	<br />
-    <a href="https://github.com/Tristus1er/AndroidBashScripts/issues">Report Bug</a>
-  </p>
-</div>
+## ./_generic_methods.sh
+This script contain generic functions used by other scripts.
+
+### detect_os
+Based on different methods, try to get the OS type we are running on.
+
+### detect_os_uname
+Used by detect_os when the first method fail, to detect the OS.
+
+### wait_for_device
+Wait for any Android device to be connected.
+
+### pushd and popd
+Avoid displaying stack when using popd and pushd
+
+### check_java
+Check that Java is available.
+
+### check_adb
+Check that ADB is available.
+
+### 
+Check that zipalign is available.
+
+### check_aapt
+Check that aapt is available.
+
+### check_certutil
+Check that certutil is available.
+
+### check_jarsigner
+Check that jarsigner is available.
+
+### check_emulator
+Check that emulator is available.
+
+### check_keytool
+Check that keytool is available.
+
+### check_telnet
+Check that telnet is available (For Windows).
+
+### check_python
+Check that python is available (For Windows).
+
+### check_pip
+Check that pip is available (For Windows).
+
+### check_frida
+Check that frida is available (For Windows).
+
+## ./_template_serial.sh
+This is a template for script using serial name.
+
+## ./_template_serial_package.sh
+This is a template for script using serial name AND package name.
+
+## ./activate_connect_tcp.sh
+This script activate Wi-Fi, then activate ADB over Wi-Fi, extract IP address and connect to device.
 
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+Example : 
+```sh
+./activate_connect_tcp.sh
+./activate_connect_tcp.sh -s emulator-5556
+```
 
-It' my collection of bash scripts I use (on Windows using Git Bash mainly) when I develop on Android.<br/>
-It help to perform simple task more quickly.
+## ./alarm_test.sh
+This script display the next alarm set for an application.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
-## Getting Started
+Example : 
+```sh
+./alarm_test.sh
+./alarm_test.sh -s emulator-5556
+```
 
-To use the scripts, you simply have to get them, and run then under bash console (Git Bash under Windows, terminal under linux, ...), that's it.
+## ./battery_optimization.sh
+This script add or remove the application to the battery optimization list.
 
-### Prerequisites
 
-You just need a terminal that interpret bash scripts.
+Example : 
+```sh
+./battery_optimization.sh -p com.android.vending
+./battery_optimization.sh -s emulator-5556 -p com.android.vending
+./battery_optimization.sh -s emulator-5556 -p com.android.vending -r
+./battery_optimization.sh -s emulator-5556 -p com.android.vending -r -d
+```
 
-### Installation
+## ./bucket_level.sh
+This script display the bucket level of an application.
+More information here : https://developer.android.com/topic/performance/appstandby
 
-Copy the files where you want.
 
-### Files
+Example : 
+```sh
+./bucket_level.sh -p com.android.vending
+./bucket_level.sh -s emulator-5556 -p com.android.vending
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## ./calc_hash_folder.sh
+This script calculate the hash of all the APKs located in the folder passed in parameter.
+You can use it with the script calc_hash_device.sh that do the same, but with applications located and extracted from a device.
 
-<!-- CONTRIBUTING -->
-## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Example : 
+```sh
+./calc_hash_folder.sh /c/apk/
+```
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+## ./change_ui_mode_light.sh
+This script activate the UI Light mode.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Example : 
+```sh
+./change_ui_mode_light.sh
+./change_ui_mode_light.sh -s emulator-5556
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## ./change_ui_mode_night.sh
+This script activate the UI Night mode.
 
-<!-- LICENSE -->
-## License
+Example : 
+```sh
+./change_ui_mode_night.sh
+./change_ui_mode_night.sh -s emulator-5556
+```
 
-Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
+## ./check_apps_state.sh
+This script give a status of the applications listed in the _config_apps.sh script:
+- Installed or NOT.
+- DEBUG/RELEASE mode.
+- Backupable or NOT.  
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
-## Contact
+Example : 
+```sh
+./check_apps_state.sh
+```
 
-Tristan SALAUN - [@TristanSALAUN](https://twitter.com/TristanSALAUN) - tristan.salaun.pro@gmail.com
+## ./choose_device.sh
+This script allow to run other script on a chosen device or on all connected devices.
 
-Project Link: [https://github.com/Tristus1er/AndroidBashScripts](https://github.com/Tristus1er/AndroidBashScripts)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Example : 
+```sh
+./choose_device.sh
+```
 
-<!-- Greetings -->
-## Greetings
+## ./choose_device_and_package.sh
+This script allow to run other script on a chosen device or on all connected devices, and if on one device you can choose the package.
 
-Thanks for the template of the readme file: 
-[Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
- 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Tristus1er/AndroidBashScripts.svg?style=for-the-badge
-[contributors-url]: https://github.com/Tristus1er/AndroidBashScripts/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Tristus1er/AndroidBashScripts.svg?style=for-the-badge
-[forks-url]: https://github.com/Tristus1er/AndroidBashScripts/network/members
-[stars-shield]: https://img.shields.io/github/stars/Tristus1er/AndroidBashScripts.svg?style=for-the-badge
-[stars-url]: https://github.com/Tristus1er/AndroidBashScripts/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Tristus1er/AndroidBashScripts.svg?style=for-the-badge
-[issues-url]: https://github.com/Tristus1er/AndroidBashScripts/issues
-[license-shield]: https://img.shields.io/github/license/Tristus1er/AndroidBashScripts.svg?style=for-the-badge
-[license-url]: https://github.com/Tristus1er/AndroidBashScripts/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/tristansalaun/
+Example : 
+```sh
+./choose_device_and_package.sh
+```
+
+## ./choose_device_usb.sh
+This script allow to run other script on a chosen device or on all connected devices.
+
+
+Example : 
+```sh
+./choose_device.sh
+```
+
+## ./choose_package.sh
+This script allow to run other script and select the package in installed applications on device.
+Note: Works only if one device is connected. Use choose_device_and_package.sh script if more than one device is connected.
+
+
+Example : 
+```sh
+./choose_package.sh
+```
+This script clear the application data.
+
+## ./clear_app.sh
+This script clear the application data.
+
+
+Example : 
+```sh
+./clear_app.sh -p com.android.vending
+./clear_app.sh -s emulator-5556 -p com.android.vending
+```
+
+## ./clear_data_apps.sh
+This script clean the applications that are in the _config_apps.sh script.
+
+
+Example : 
+```sh
+./clear_data_apps.sh
+./clear_data_apps.sh -s emulator-5556
+```
+
+## ./close_apps.sh
+This script close the applications that are in the list of _config_apps.sh script.
+
+
+Example : 
+```sh
+./close_apps.sh
+./close_apps.sh -s emulator-5556
+```
+
+## ./delete_all_apps.sh
+This script delete all the applications of the list defined in _config_apps.sh script.
+
+
+Example : 
+```sh
+./delete_all_apps.sh
+./delete_all_apps.sh -s emulator-5556
+```
+
+## ./delete_app.sh
+This script delete the application in parameter. Use with choose_package.sh to get the name of the package.
+
+
+Example : 
+```sh
+./delete_app.sh -p com.android.vending
+./delete_app.sh -s emulator-5556 -p com.android.vending
+```
+
+## ./dev_light4events.sh
+
+## ./device_info.sh
+This script display some information about the device.
+
+
+Example : 
+```sh
+./device_info.sh
+./device_info.sh -s emulator-5556
+```
+
+## ./enter_doze_mode.sh
+This script contain an example to update the password of the keystore and the KeyAlias.
+
+
+Example : 
+```sh
+./keystore_password.sh
+```
+
+## ./lockito.sh
+

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#* Ce script contient des fonctions utilisées dans d'autres scripts, pour factoriser le code.
+#* This script contain generic functions used by other scripts.
 
 
 #Reference for colors : https://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -46,7 +46,7 @@ display_title(){
 
 #* 
 #* ### detect_os
-#* Based ondifferent methods, try to get the OS type we are running on.
+#* Based on different methods, try to get the OS type we are running on.
 detect_os () {
 case "$OSTYPE" in
   solaris*) OS='SOLARIS' ;;
@@ -262,106 +262,6 @@ check_telnet () {
   return 0
 }
 
-#* 
-#* ### getScript
-#* Download a file (in our case: a script).
-#* @param The name of the file to store
-#* @param The URL of the file to download
-getScript() {
-  echo -e "${CYAN}Get $1${NC}"
-	  curl.exe -sS -o $1 $2
-	  # Gitlabversion curl -sS -L -k --request GET --header "PRIVATE-TOKEN: $GITLAB_API_TOKEN" -o $1 $2
-
-	  if test -f "./$1"; then
-		echo -e "${GREEN}./$1 downloaded.${NC}"
-	  else
-	  	echo -e "${RED}./$1 script is missing, and is mandatory.${NC}"
-		exit 1
-  fi
-}
-
-#* 
-#* ### getScriptIfNeeded
-# Download a file (in our case: a script), only if it do not exist (avoid replacing the actual one).
-# @param The name of the file to store
-# @param The URL of the file to download
-getScriptIfNeeded() {
-  echo "Check that $1 script is available."
-  if test -f "./$1"; then
-	echo -e "${YELLOW}./$1 exists NO UPDATE DONE.${NC}"
-  else
-	echo -e "${CYAN}Get $1${NC}"
-	  curl.exe -sS -o $1 $2
-	#GitLabVersion curl -sS -L -k --request GET --header "PRIVATE-TOKEN: $GITLAB_API_TOKEN" -o $1 $2
-	  if test -f "./$1"; then
-		echo -e "${GREEN}./$1 downloaded.${NC}"
-	  else
-	  	echo -e "${RED}./$1 script is missing, and is mandatory.${NC}"
-		exit 1
-	  fi
-  fi
-}
-
-#* 
-#* ### Methods to parse XML.
-#########################
-# Parsing RSS, HTML, ...#
-#########################
-
-#* #### xmlgetnext
-#* Allow to parse XML.
-function xmlgetnext () {
-   local IFS='>'
-   read -d '<' TAG VALUE
-}
-
-#* 
-#* #### get_branch_of_job
-#* Get the branch name of a job.
-function get_branch_of_job() {
-	curl.exe -sS -o tmp_build_page.html $1
-	grep BRANCH tmp_build_page.html | sed 's@.*BRANCH=\(.*\), MODULES_PROFILE.*@\1@g'
-}
-
-#* 
-#* #### get_build_number
-#* Get the build number from jenkins URL.
-function get_build_number() {
-	# http://jenkins.sics/job/build-sicsd/1375/
-	echo $1 | sed 's@http://jenkins.sics/job/.*/\([0-9]*\)/@\1@g'
-}
-
-#* 
-#* #### get_status_of_job
-#* Get the status of the selected job.
-function get_status_of_job() {
-	curl.exe -sS -o tmp_build_page.html $1
-	grep "/buildTimeTrend" tmp_build_page.html | sed 's@.* alt="\(.*\)" tooltip.*@\1@g'
-}
-
-#* 
-#* #### get_date_of_job
-#* Get the date of the job.
-function get_date_of_job() {
-	curl.exe -sS -o tmp_build_page.html $1
-	awk '/Build #/{getline; print}' tmp_build_page.html | sed 's@.*(\(.*\)).*@\1@g'
-}
-
-#* 
-#* #### get_sics_branch_of_job
-#* Get the branch name for sics.
-function get_sics_branch_of_job() {
-	curl.exe -sS -o tmp_build_page.html $1
-	grep BRANCH tmp_build_page.html | sed 's@.*Started by timer with parameters: {SICS_BRANCH=\(.*\)}<.*@\1@g'
-}
-
-#* 
-#* #### get_pims_from_job
-#* Get the pims path of job.
-function get_pims_from_job() {
-	curl.exe -sS -o tmp_build_page.html $1
-	grep "artifact/assemblies/runtime/target/bull-pims" tmp_build_page.html | sed "s@.*target/\(.*\)';.*@\1@g"
-}
 
 ##########
 # Python #
