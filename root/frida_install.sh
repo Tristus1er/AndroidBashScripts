@@ -28,6 +28,105 @@ display_os_detected() {
 	esac
 }
 
+# Check Windows/Linux dependencies
+check_dependencies() {
+
+	local required=0
+
+	####################################################
+	# Install Frida client, and dependancies if needed #
+	####################################################
+
+	case $OS in
+	  LINUX)
+		# Check root available, or at least sudo
+		display_separator "Check root perms"
+		if [ "$EUID" -ne 0 ]
+			then 
+			echo -n -e "${RED}/!\ Please run as root (to install dependencies - not implemented yet !)"
+			echo -e "${NC}"
+		fi
+
+		check_adb
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_emulator
+
+		check_unxz
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_python
+		if [ "$?" -ne 0 ];then $required=1; fi
+	
+		check_pip
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_pipx
+		if [ "$?" -ne 0 ];then $required=1; fi
+	
+		check_frida
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		;;
+	  WINDOWS)
+		# Check admin mode is available
+		display_separator "Check Admin mode"
+		check_admin_windows
+
+		check_adb
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_emulator
+
+		check_7z
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_python
+		if [ "$?" -ne 0 ];then $required=1; fi
+	
+		check_pip
+		if [ "$?" -ne 0 ];then $required=1; fi
+	
+		check_pipx
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		check_frida
+		if [ "$?" -ne 0 ];then $required=1; fi
+
+		# if [ $? -ne 0 ]
+		# then
+		# 	echo -e "${CYAN}Install frida with pip.${NC}"
+		# 	echo -e "${CYAN}NOTE : If it's stuck here ... setup the proxy parameters :${NC}"
+		# 	echo -e "${CYAN}Ctrl + C to stop this process ... be patient, then :${NC}"
+		# 	echo -e "${CYAN}example : export http_proxy='http://w3p2.atos-infogerance.fr:8080'${NC}"
+		# 	echo -e "${CYAN}example : export https_proxy='http://w3p2.atos-infogerance.fr:8080'${NC}"
+		# 	pip install frida-tools
+			
+		# 	# Check if frida has been successfully installed
+		# 	check_frida
+		# 	if [ $? -ne 0 ]
+		# 	then
+		# 		echo -e "${RED}Frida fail to be installed. Check the logs, and maybe add it manually to the PATH.${NC}"
+		# 		exit 14
+		# 	fi
+		# fi
+		;;
+	  *)
+		;;
+	esac
+	echo $required
+	# Some dependencies missing, stop the script
+	if [ $required -ne 0 ]
+	then
+		echo -e "${NC}"
+	    echo -e "${RED}/!\ Some dependencies are required, please install them to continue.${NC}"
+		echo -e "${NC}"
+		exit 2
+	fi
+
+
+}
+
 # Check admin mode is ok
 check_admin_windows(){
 	# Source: https://www.anycodings.com/1questions/3092404/is-there-a-command-to-check-if-git-bash-is-opened-in-administrator-mode
@@ -61,75 +160,12 @@ case $OS in
 esac
 
 
-display_title "Check dependancies"
+display_title "Check dependencies"
 
-# check_adb
-# if [ $? -ne 0 ]
-# then
-#     echo -e "${RED}ADB is missing, please install it to continue.${NC}"
-# 	exit 10
-# fi
-# 
-# check_emulator
-# if [ $? -ne 0 ]
-# then
-#     echo -e "${RED}emulator is missing, please install it to continue.${NC}"
-# 	exit 11
-# fi
-
-
-####################################################
-# Install Frida client, and dependancies if needed #
-####################################################
-
-# case $OS in
-#   LINUX)
-# 	# Check root available, or at least sudo
-# 	;;
-#   WINDOWS)
-#   
-# 	check_python
-# 	if [ $? -ne 0 ]
-# 	then
-# 		echo -e "${RED}python is missing, please install it to continue.${NC}"
-# 		python
-# 		exit 12
-# 	fi
-# 
-# 	check_pip
-# 	if [ $? -ne 0 ]
-# 	then
-# 		echo -e "${RED}pip is missing, please install it to continue.${NC}"
-# 		exit 13
-# 	fi
-# 
-# 
-# 	# Check if frida is installed
-# 	check_frida
-# 	if [ $? -ne 0 ]
-# 	then
-# 		echo -e "${CYAN}Install frida with pip.${NC}"
-# 		echo -e "${CYAN}NOTE : If it's stuck here ... setup the proxy parameters :${NC}"
-# 		echo -e "${CYAN}Ctrl + C to stop this process ... be patient, then :${NC}"
-# 		echo -e "${CYAN}example : export http_proxy='http://w3p2.atos-infogerance.fr:8080'${NC}"
-# 		echo -e "${CYAN}example : export https_proxy='http://w3p2.atos-infogerance.fr:8080'${NC}"
-# 		pip install frida-tools
-# 		
-# 		# Check if frida has been successfully installed
-# 		check_frida
-# 		if [ $? -ne 0 ]
-# 		then
-# 			echo -e "${RED}Frida fail to be installed. Check the logs, and maybe add it manually to the PATH.${NC}"
-# 			exit 14
-# 		fi
-# 	fi
-# 	;;
-#   *)
-# 	;;
-# esac
-# 
+check_dependencies
 
 FRIDA_CLIENT_VERSION=`frida --version`
+
 
 display_title "Check that root device is available"
 
@@ -371,9 +407,20 @@ else
 	curl -L -o frida-server.xz https://github.com$URL_TO_USE
 
 	echo "Unzip the downloaded file."
-	#TODO : check that 7Zip is installed
-	/c/Program\ Files/7-Zip/7z.exe x -y  'frida-server.xz'
+	case $OS in
+		LINUX)
+			unxz 'frida-server.xz'
+			;;
+		WINDOWS)
+			/c/Program\ Files/7-Zip/7z.exe x -y 'frida-server.xz'
+			;;
+		*)
+			echo -e "${RED}Can't decompress frida file: OS type ($OS) not recognized or not supported (yet), check detect_os method to detect your OS.${NC}"
+			exit
+			;;
+	esac
 
+	
 	echo "Clean the file."
 	rm 'frida-server.xz'
 
@@ -529,8 +576,20 @@ done
 
 if [ "$ACTIVATE_PROXY" = true ] ; then
 	echo "Activate proxy."
-	#ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
-	LOCAL_IP=$(ipconfig | grep 'IPv4 Address' | grep -v "Autoconfiguration" | grep -Eo '([0-9]*\.){3}[0-9]*')
+
+	case $OS in
+		LINUX)
+			#ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
+			LOCAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
+			;;
+		WINDOWS)
+			LOCAL_IP=$(ipconfig | grep 'IPv4 Address' | grep -v "Autoconfiguration" | grep -Eo '([0-9]*\.){3}[0-9]*')
+			;;
+		*)
+			echo -e "${RED}Can't find proxy IP: OS type ($OS) not recognized or not supported (yet), check detect_os method to detect your OS.${NC}"
+			exit
+			;;
+	esac
 
 	echo -e "Set proxy on android device to: ${CYAN}$LOCAL_IP:8080${NC} with the following command:"
 	echo adb -s $DEVICE_TO_USE shell settings put global http_proxy $LOCAL_IP:8080
