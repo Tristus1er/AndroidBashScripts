@@ -606,7 +606,7 @@ if [ "$ACTIVATE_PROXY" = true ] ; then
 fi
 
 #echo "FRIDA_ACTION_TO_USE = $FRIDA_ACTION_TO_USE"
-echo -e "Command launched: ${CYAN}frida $FRIDA_PARAMETER -U -f $TARGET_APPLICATION${NC}"
+echo -e "Command launched: ${CYAN}frida -D $DEVICE_TO_USE $FRIDA_PARAMETER -f $TARGET_APPLICATION${NC}"
 
 echo -e "${MAGENTA}To exit, enter command : q${NC}"
 if [ $(version $FRIDA_CLIENT_VERSION) -ge $(version "15.2.0") ] ; then
