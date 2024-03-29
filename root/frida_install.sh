@@ -52,6 +52,9 @@ check_dependencies() {
 
 		check_emulator
 
+		check_unxz
+		if [ "$?" -ne 0 ];then $required=1; fi
+
 		check_python
 		if [ "$?" -ne 0 ];then $required=1; fi
 	
@@ -74,6 +77,9 @@ check_dependencies() {
 		if [ "$?" -ne 0 ];then $required=1; fi
 
 		check_emulator
+
+		check_7z
+		if [ "$?" -ne 0 ];then $required=1; fi
 
 		check_python
 		if [ "$?" -ne 0 ];then $required=1; fi
@@ -401,19 +407,18 @@ else
 	curl -L -o frida-server.xz https://github.com$URL_TO_USE
 
 	echo "Unzip the downloaded file."
-	#TODO : check that 7Zip is installed
-        case $OS in
-          LINUX)
-                unxz 'frida-server.xz'
-                ;;
-          WINDOWS)
-                /c/Program\ Files/7-Zip/7z.exe x -y 'frida-server.xz'
-                ;;
-          *)
-                echo -e "${RED}Can't decompress frida file: OS type ($OS) not recognized or not supported (yet), check detect_os method to detect your OS.${NC}"
-                exit
-                ;;
-        esac
+	case $OS in
+		LINUX)
+			unxz 'frida-server.xz'
+			;;
+		WINDOWS)
+			/c/Program\ Files/7-Zip/7z.exe x -y 'frida-server.xz'
+			;;
+		*)
+			echo -e "${RED}Can't decompress frida file: OS type ($OS) not recognized or not supported (yet), check detect_os method to detect your OS.${NC}"
+			exit
+			;;
+	esac
 
 	
 	echo "Clean the file."
@@ -571,8 +576,20 @@ done
 
 if [ "$ACTIVATE_PROXY" = true ] ; then
 	echo "Activate proxy."
-	#ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
-	LOCAL_IP=$(ipconfig | grep 'IPv4 Address' | grep -v "Autoconfiguration" | grep -Eo '([0-9]*\.){3}[0-9]*')
+
+	case $OS in
+		LINUX)
+			#ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
+			LOCAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
+			;;
+		WINDOWS)
+			LOCAL_IP=$(ipconfig | grep 'IPv4 Address' | grep -v "Autoconfiguration" | grep -Eo '([0-9]*\.){3}[0-9]*')
+			;;
+		*)
+			echo -e "${RED}Can't find proxy IP: OS type ($OS) not recognized or not supported (yet), check detect_os method to detect your OS.${NC}"
+			exit
+			;;
+	esac
 
 	echo -e "Set proxy on android device to: ${CYAN}$LOCAL_IP:8080${NC} with the following command:"
 	echo adb -s $DEVICE_TO_USE shell settings put global http_proxy $LOCAL_IP:8080
