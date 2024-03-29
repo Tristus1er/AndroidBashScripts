@@ -278,8 +278,8 @@ if [[ "$IS_FRIDA_INSTALLED" == "1" ]]; then
 	echo -e "Frida server version : ${CYAN}$FRIDA_SERVER_VERSION${NC}"
 	if [[ "$FRIDA_CLIENT_VERSION" != "$FRIDA_SERVER_VERSION" ]]; then
 		echo -e "${YELLOW}!!! WARNING : versions of client and server mismatch !!!${NC}";
-		echo -e "${YELLOW}!!! To upgrade the client version, delete the file on the device an restart this script : adb shell rm data/local/tmp/frida-server ${NC}";
-		echo -e "${YELLOW}!!! To upgrade the server version, use : pip install --upgrade frida ${NC}";
+		echo -e "${YELLOW}!!! To upgrade the server version (on the phone), delete the file on the device an restart this script : adb shell rm data/local/tmp/frida-server ${NC}";
+		echo -e "${YELLOW}!!! To upgrade the client version (on the computer), use : pip install --upgrade frida ${NC}";
 	fi
 	
 	IS_FRIDA_RUNNING=`adb -s $DEVICE_TO_USE shell "ps" | grep "frida-server" | wc -l`
@@ -328,7 +328,7 @@ else
 	
 	echo -e "Get last Frida version name from ${CYAN}https://github.com/frida/frida/tags${NC}."
 	curl -sS -o frida_tags.html https://github.com/frida/frida/tags
-	RELEASE_VERSION=`cat frida_tags.html | grep "/frida/frida/releases/tag/" | head -1 | sed 's#.*primary\">\(.*\)</a></h2>.*#\1#g'`
+	RELEASE_VERSION=`cat frida_tags.html | grep "/frida/frida/releases/tag/" | head -1 | sed 's#.*primary Link\">\(.*\)</a></h2>.*#\1#g'`
 	#       <h2 data-view-component="true" class="f4 d-inline"><a href="/frida/frida/releases/tag/16.0.2" data-view-component="true" class="Link--primary">16.0.2</a></h2>
 	#Result or newer version of course
 	#RELEASE_VERSION=16.0.2
@@ -467,8 +467,9 @@ fi
 
 #https://codeshare.frida.re/browse
 declare -A FRIDA_ACTION_LIST=(
-	["frida-multiple-unpinning"]="akabe1/frida-multiple-unpinning"
-	["Universal_Android_SSL_Pinning_Bypass_with_Frida"]="pcipolloni/universal-android-ssl-pinning-bypass-with-frida"
+	["Local script"]=""
+	["SSL_frida-multiple-unpinning"]="akabe1/frida-multiple-unpinning"
+	["SSL_Universal_Android_SSL_Pinning_Bypass_with_Frida"]="pcipolloni/universal-android-ssl-pinning-bypass-with-frida"
 	["SharedPreferences"]="ninjadiary/frinja---sharedpreferences"
 	["Android_Location_Spoofing"]="dzervas/android-location-spoofing"
 	["SQLite_Database"]="ninjadiary/sqlite-database"
@@ -476,18 +477,19 @@ declare -A FRIDA_ACTION_LIST=(
 	["Sockets"]="ninjadiary/frinja---sockets"
 	["Android_Broadcast_Receiver"]="leolashkevych/android-broadcast-receiver"
 	["EncryptedSharedPreferences"]="Alkeraithe/encryptedsharedpreferences"
-	["Intercept_Android_APK_Crypto_Operations"]="fadeevab/intercept-android-apk-crypto-operations"
-	["Multiple-root-detection-bypass"]="KishorBal/multiple-root-detection-bypass"
-	["Fridaantiroot"]="khoomelvin/fridaantiroot"
-	["anti-root"]="Surendrajat/anti-root"
-	["HideRoot"]="apkunpacker/hideroot"
-	["fridantiroot"]="dzonerzy/fridantiroot"
+	["Crypto_Intercept_Android_APK_Crypto_Operations"]="fadeevab/intercept-android-apk-crypto-operations"
+	["AntiROOT_Multiple-root-detection-bypass"]="KishorBal/multiple-root-detection-bypass"
+	["AntiROOT_Fridaantiroot"]="khoomelvin/fridaantiroot"
+	["AntiROOT_anti-root"]="Surendrajat/anti-root"
+	["AntiROOT_HideRoot"]="apkunpacker/hideroot"
+	["AntiROOT_fridantiroot"]="dzonerzy/fridantiroot"
 	["anti-frida-bypass"]="enovella/anti-frida-bypass"
 	["DynamicHooks"]="realgam3/dynamichooks"
 )
 
 echo ""
 echo ""
+echo "Other frida scripts can be found: https://codeshare.frida.re/browse"
 PS3="Choose the frida script to use: "
 
 select action in "${!FRIDA_ACTION_LIST[@]}"; do
@@ -496,6 +498,22 @@ select action in "${!FRIDA_ACTION_LIST[@]}"; do
 done
 
 echo -e "Selected action : ${CYAN}$FRIDA_ACTION${NC}"
+
+FRIDA_ACTION_TO_USE=${FRIDA_ACTION_LIST[$FRIDA_ACTION]}
+
+#echo -e "Selected action : ${CYAN}$FRIDA_ACTION_TO_USE${NC}"
+
+FRIDA_PARAMETER=""
+
+# If the action is empty, then choose a script
+if [ "$FRIDA_ACTION" = "Local script" ] ; then
+	echo "Select local file:"
+	read -p 'Frida script full path> ' FRIDA_SCRIPT
+	FRIDA_PARAMETER="-l $FRIDA_SCRIPT"
+else
+	FRIDA_PARAMETER="--codeshare $FRIDA_ACTION_TO_USE"
+fi
+
 
 ACTIVATE_PROXY=false
 while true; do
@@ -517,13 +535,21 @@ if [ "$ACTIVATE_PROXY" = true ] ; then
 	echo -e "Set proxy on android device to: ${CYAN}$LOCAL_IP:8080${NC} with the following command:"
 	echo adb -s $DEVICE_TO_USE shell settings put global http_proxy $LOCAL_IP:8080
 	adb -s $DEVICE_TO_USE shell settings put global http_proxy $LOCAL_IP:8080
+	
+	echo -e "Launch an HTTP proxy on your computer, for example ${CYAN}Burp Suite${NC}."
+	echo -e "Menu Proxy, then Proxy settings"
+	echo -e "Proxy listeners"
+	echo -e "Remove the actual 127.0.0.1:8080 listener."
+	echo -e "Add new one : Bind to port: 8080"
+	echo -e "Bind to address: All interfaces"
+	echo -e "Open the HTTP History tab"
 fi
 
-FRIDA_ACTION_TO_USE=${FRIDA_ACTION_LIST[$FRIDA_ACTION]}
-
 #echo "FRIDA_ACTION_TO_USE = $FRIDA_ACTION_TO_USE"
-echo -e "Command launched: ${CYAN}frida --codeshare $FRIDA_ACTION_TO_USE -U -f $TARGET_APPLICATION${NC}"
-frida -D $DEVICE_TO_USE --codeshare $FRIDA_ACTION_TO_USE -f $TARGET_APPLICATION
+echo -e "Command launched: ${CYAN}frida $FRIDA_PARAMETER -U -f $TARGET_APPLICATION${NC}"
+
+echo -e "${MAGENTA}To exit, enter command : q${NC}"
+frida --no-pause -D $DEVICE_TO_USE $FRIDA_PARAMETER -f $TARGET_APPLICATION
 
 
 if [ "$ACTIVATE_PROXY" = true ] ; then
