@@ -25,6 +25,8 @@ repeat(){
 display_title(){
 	TITLE_LENGTH=`echo $1 | wc -c`
 
+  echo -e "${NC}"
+  
 	# Header	
 	echo -n -e "${PURPLE}"
 	repeat '#' $TITLE_LENGTH
@@ -40,7 +42,7 @@ display_title(){
 	echo -n -e "${PURPLE}"
 	repeat '#' $TITLE_LENGTH
 	repeat '#' 3
-	echo -e "${NC}"
+	echo -e "${NC}${NC}"
 }
 
 # Display separator
@@ -54,6 +56,10 @@ display_separator(){
 	echo -n -e "${PURPLE}"
   repeat '=' $SEPARATOR_LENGTH
 	echo -e "${NC}"
+}
+
+version() { 
+  echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; 
 }
 
 #* 

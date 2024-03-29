@@ -114,11 +114,12 @@ check_dependencies() {
 	  *)
 		;;
 	esac
-	echo $required
+	
+	echo -e "${NC}"
+
 	# Some dependencies missing, stop the script
 	if [ $required -ne 0 ]
 	then
-		echo -e "${NC}"
 	    echo -e "${RED}/!\ Some dependencies are required, please install them to continue.${NC}"
 		echo -e "${NC}"
 		exit 2
@@ -608,8 +609,11 @@ fi
 echo -e "Command launched: ${CYAN}frida $FRIDA_PARAMETER -U -f $TARGET_APPLICATION${NC}"
 
 echo -e "${MAGENTA}To exit, enter command : q${NC}"
-frida --no-pause -D $DEVICE_TO_USE $FRIDA_PARAMETER -f $TARGET_APPLICATION
-
+if [ $(version $FRIDA_CLIENT_VERSION) -ge $(version "15.2.0") ] ; then
+	frida -D $DEVICE_TO_USE $FRIDA_PARAMETER -f $TARGET_APPLICATION
+else
+	frida --no-pause -D $DEVICE_TO_USE $FRIDA_PARAMETER -f $TARGET_APPLICATION
+fi
 
 if [ "$ACTIVATE_PROXY" = true ] ; then
 	echo "Remove proxy."
