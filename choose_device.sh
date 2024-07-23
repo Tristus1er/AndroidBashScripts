@@ -20,6 +20,8 @@ else
 	COMMAND_TO_LAUNCH="$1 $2 $3 $4 $5 $6 $7 $8 $9"
 fi
 
+# Path to the Git Bash executable
+GIT_BASH_PATH="/c/Program Files/Git/bin/bash.exe"
 
 PS3='Choose the device to run the script: '
 
@@ -44,8 +46,8 @@ select deviceChoosen in "${deviceListChoice[@]}"; do
             echo "Loop on all of them"
 			for currentDevice in "${deviceList[@]}"
 			do
-			   echo -e "Running : ${CYAN}$currentDevice${NC}"
-			   start ./$COMMAND_TO_LAUNCH -s $currentDevice
+			   echo -e "Running : ${CYAN}$currentDevice${NC} $COMMAND_TO_LAUNCH -s $currentDevice"
+			   start "" "$GIT_BASH_PATH" -c "$COMMAND_TO_LAUNCH -s $currentDevice"
 			done
 			exit
             ;;

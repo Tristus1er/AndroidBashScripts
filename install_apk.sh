@@ -78,6 +78,14 @@ echo -e "${PURPLE}**************************${NC}"
 echo -e "${PURPLE}*     INSTALL AN APK     *${NC}"
 echo -e "${PURPLE}**************************${NC}"
 
+if [ -f "$APK_PATH" ]; then
+    echo "$APK_PATH exists."
+else
+	echo -e "${RED}File is missing: ${APK_PATH}${NC}"
+	exit 12
+fi
+
+
 
 if [ -z "${DEVICE_PARAMETER}" ]; then
 	wait_for_device
@@ -95,11 +103,10 @@ then
   if [ $? -ne 0 ]
   then
 	echo -e "${RED}ERROR Install.${NC}"
+	exit 13
   else
 	echo -e "${GREEN}INSTALL OK.${NC}"
   fi
 else
   echo -e "${GREEN}INSTALL OK.${NC}"
 fi
-
-sleep 10

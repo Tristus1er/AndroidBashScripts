@@ -7,6 +7,7 @@
 #* ```sh
 #* ./grant_all_permissions.sh -p com.android.vending
 #* ./grant_all_permissions.sh -s emulator-5556 -p com.android.vending
+#* ./grant_all_permissions.sh -r -s emulator-5556 -p com.android.vending
 #* ```
 
 source _generic_methods.sh
@@ -18,6 +19,7 @@ function usage() {
   echo "$0 [-s <deviceSerialNumber>] -p <applicationPackage>"
   echo " -s deviceSerialNumber: The serial number of the device to use to run the command."
   echo " -p applicationPackage : The package name of the application to handle."
+  echo " -r : Revoke mode."
   echo ""
   echo "Example :"
   echo "$0 -p com.android.vending"
@@ -30,15 +32,17 @@ function usage() {
 # -------------------------------------------------------------------------------------------------
 DEVICE_PARAMETER=
 PACKAGE_NAME=
+GRANTING_MODE='grant'
 
 # -------------------------------------------------------------------------------------------------
 # Main
 # -------------------------------------------------------------------------------------------------
 
-while getopts "vhs:p:" arg; do
+while getopts "vhrs:p:" arg; do
     case $arg in
          s) DEVICE_PARAMETER="-s $OPTARG";;
          p) PACKAGE_NAME="$OPTARG";;
+         r) GRANTING_MODE='revoke';;
          h) usage; exit 1;;
          v) echo "version 1.0.0"; exit 1;;
 		 *) usage; exit 1;;
@@ -51,25 +55,56 @@ if [ -z "${PACKAGE_NAME}" ]; then
 	exit 1
 fi
 
-echo -e "${PURPLE}*****************************************************${NC}"
-echo -e "${PURPLE}*     GRANT ALL PERMISSIONS FOR THE APPLICATION     *${NC}"
-echo -e "${PURPLE}*****************************************************${NC}"
 
-if [ -z "${DEVICE_PARAMETER}" ]; then
-	wait_for_device
+if [[ $GRANTING_MODE = "grant" ]]
+then
+
+    echo -e "${PURPLE}*****************************************************${NC}"
+	echo -e "${PURPLE}*     GRANT ALL PERMISSIONS FOR THE APPLICATION     *${NC}"
+	echo -e "${PURPLE}*****************************************************${NC}"
+
+	if [ -z "${DEVICE_PARAMETER}" ]; then
+		wait_for_device
+	fi
+
+	#Gell all non granted permissions
+	PERMISSIONS_LIST=`adb $DEVICE_PARAMETER shell dumpsys package $PACKAGE_NAME | grep "granted=false" | sed "s/^[[:blank:]]*//;s/[[:blank:]]*$//" | sed "s/^\(.*\):.*/\1/"`
+	echo "Permissions not granted, to be granted:"
+	echo "$PERMISSIONS_LIST" # use the " to keep the carriage return in the variable
+
+	echo "--------------------------------------------------------------------------------"
+	for PERMISSION in $PERMISSIONS_LIST
+	do
+	  echo "Granting $PERMISSION"
+	  adb $DEVICE_PARAMETER shell pm grant $PACKAGE_NAME $PERMISSION
+	done
+
+else
+
+    echo -e "${PURPLE}*****************************************************${NC}"
+	echo -e "${PURPLE}*     REVOKE ALL PERMISSIONS FOR THE APPLICATION     *${NC}"
+	echo -e "${PURPLE}*****************************************************${NC}"
+
+	if [ -z "${DEVICE_PARAMETER}" ]; then
+		wait_for_device
+	fi
+
+	#Gell all non granted permissions
+	PERMISSIONS_LIST=`adb $DEVICE_PARAMETER shell dumpsys package $PACKAGE_NAME | grep "granted=true" | sed "s/^[[:blank:]]*//;s/[[:blank:]]*$//" | sed "s/^\(.*\):.*/\1/"`
+	echo "Permissions granted, to be revoked:"
+	echo "$PERMISSIONS_LIST" # use the " to keep the carriage return in the variable
+
+	echo "--------------------------------------------------------------------------------"
+	for PERMISSION in $PERMISSIONS_LIST
+	do
+	  echo "Granting $PERMISSION"
+	  adb $DEVICE_PARAMETER shell pm revoke $PACKAGE_NAME $PERMISSION
+	done
+
 fi
 
-#Gell all non granted permissions
-PERMISSIONS_LIST=`adb $DEVICE_PARAMETER shell dumpsys package $PACKAGE_NAME | grep "granted=false" | sed "s/^[[:blank:]]*//;s/[[:blank:]]*$//" | sed "s/^\(.*\):.*/\1/"`
-echo "Permissions not granted, to be granted:"
-echo "$PERMISSIONS_LIST" # use the " to keep the carriage return in the variable
 
-echo "--------------------------------------------------------------------------------"
-for PERMISSION in $PERMISSIONS_LIST
-do
-  echo "Granting $PERMISSION"
-  adb $DEVICE_PARAMETER shell pm grant $PACKAGE_NAME $PERMISSION
-done
+
 
 
 PERMISSIONS_LIST=`adb $DEVICE_PARAMETER shell dumpsys package $PACKAGE_NAME | grep "granted=false" | sed "s/^[[:blank:]]*//;s/[[:blank:]]*$//" | sed "s/^\(.*\):.*/\1/"`
@@ -106,3 +141,6 @@ echo "$PERMISSIONS_LIST" # use the " to keep the carriage return in the variable
 # adb $DEVICE_PARAMETER shell pm grant com.stid.blechallenge android.permission.ACCESS_COARSE_LOCATION
 # adb $DEVICE_PARAMETER shell pm grant com.stid.blechallenge android.permission.ACCESS_BACKGROUND_LOCATION
 # adb $DEVICE_PARAMETER shell pm grant com.stid.blechallenge android.permission.BLUETOOTH_SCAN
+
+# Reset all permissions for all the application in the mobile
+# adb shell pm reset-permissions
