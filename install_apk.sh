@@ -54,22 +54,25 @@ done
 
 if [ -z "${APK_PATH}" ]; then
 	echo -e "${RED}APK path must not be empty.${NC}"
-    usage
-	exit 1
+  usage
+  sleep 10
+  exit 1
 fi
 
 
 check_adb
 if [ $? -ne 0 ]
 then
-    echo -e "${RED}ADB is missing, please install it to continue.${NC}"
+  echo -e "${RED}ADB is missing, please install it to continue.${NC}"
+	sleep 10
 	exit 10
 fi
 
 check_aapt
 if [ $? -ne 0 ]
 then
-    echo -e "${RED}aapt is missing, please install it to continue.${NC}"
+  echo -e "${RED}aapt is missing, please install it to continue.${NC}"
+	sleep 10
 	exit 11
 fi
 
@@ -102,8 +105,19 @@ then
   adb $DEVICE_PARAMETER install -r -d -g -t "$APK_PATH"
   if [ $? -ne 0 ]
   then
-	echo -e "${RED}ERROR Install.${NC}"
-	exit 13
+	#Source: https://stackoverflow.com/questions/15014519/apk-installation-failed-install-failed-verification-failure
+	echo -e "${CYAN}Disable APK verifications.${NC}"
+	adb shell settings put global verifier_verify_adb_installs 0
+	adb shell settings put global package_verifier_enable 0
+	adb $DEVICE_PARAMETER install -r -d -g -t "$APK_PATH"
+	if [ $? -ne 0 ]
+	then
+		echo -e "${RED}ERROR Install.${NC}"
+		sleep 10
+		exit 13
+	else
+		echo -e "${GREEN}INSTALL OK.${NC}"
+	  fi
   else
 	echo -e "${GREEN}INSTALL OK.${NC}"
   fi
